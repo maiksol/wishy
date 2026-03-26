@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int             @id @default(autoincrement())
+  name         String
+  email        String          @unique
+  passwordHash String
+  createdAt    DateTime        @default(now())
+  ownedLists   WishList[]      @relation("OwnedLists")
+  shares       WishListShare[]
+  reservations Reservation[]
+}
+
+model WishList {
+  id         Int             @id @default(autoincrement())
+  name       String
+  theme      String?
+  shareToken String?         @unique
+  createdAt  DateTime        @default(now())
+  ownerId    Int
+  owner      User            @relation("OwnedLists", fields: [ownerId], references: [id], onDelete: Cascade)
+  wishes     Wish[]
+  shares     WishListShare[]
+}
+
+model WishListShare {
+  id        Int      @id @default(autoincrement())
+  listId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+  list      WishList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, userId])
+}
+
+model Wish {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  url         String?
+  createdAt   DateTime     @default(now())
+  listId      Int
+  list        WishList     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  reservation Reservation?
+}
+
+model Reservation {
+  id        Int      @id @default(autoincrement())
+  wishId    Int      @unique
+  userId    Int
+  status    String
+  createdAt DateTime @default(now())
+  wish      Wish     @relation(fields: [wishId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
