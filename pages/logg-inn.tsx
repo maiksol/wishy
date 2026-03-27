@@ -15,7 +15,8 @@ export default function LoggInn() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const callbackUrl = (router.query.callbackUrl as string) ?? '/'
+  const raw = router.query.callbackUrl as string | undefined
+  const callbackUrl = raw?.startsWith('/') ? raw : '/'
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
