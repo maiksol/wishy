@@ -38,18 +38,18 @@
 
 /* ─── Birthday ─── */
 .bursdag {
-  --primary:        #f59e0b;
-  --primary-hover:  #d97706;
-  --primary-subtle: #fef9ec;
-  --bg:             #fffbf0;
+  --primary:        #c026d3;
+  --primary-hover:  #a21caf;
+  --primary-subtle: #fdf4ff;
+  --bg:             #fdf2f8;
   --surface:        #ffffff;
-  --border:         #fde68a;
-  --text:           #1c1308;
-  --text-muted:     #92650a;
-  --link:           #7c3aed;
-  --delete:         #92650a;
-  --delete-hover:   #dc2626;
-  --shadow:         0 2px 12px rgba(245, 158, 11, 0.12);
+  --border:         #f0abfc;
+  --text:           #1a0a20;
+  --text-muted:     #86198f;
+  --link:           #0e7490;
+  --delete:         #9d174d;
+  --delete-hover:   #be123c;
+  --shadow:         0 2px 12px rgba(192, 38, 211, 0.15);
 }
 
 /* ─── Wedding ─── */
