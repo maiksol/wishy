@@ -181,8 +181,8 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
         <div className={styles.listTitleRow}>
           <div>
             <h2 className={styles.listTitle}>
-              {!isOwner && <span className={styles.listTitleOwner}>{ownerName} – </span>}
               {initialList.name}
+              {!isOwner && <span className={styles.listTitleOwner}> – {ownerName}</span>}
             </h2>
             {isOwner && shares.length > 0 && (
               <div className={styles.sharedWithRow}>
