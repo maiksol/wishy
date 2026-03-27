@@ -15,12 +15,6 @@ type ListWithMeta = WishList & {
   owner: { name: string }
 }
 
-const THEME_LABELS: Record<string, string> = {
-  jul: '🎄 Jul',
-  bursdag: '🎂 Bursdag',
-  bryllup: '💍 Bryllup',
-}
-
 const THEME_COLORS: Record<string, string> = {
   jul: '#2d7a4f',
   bursdag: '#f59e0b',
@@ -61,7 +55,7 @@ function ListCard({
               <span className={styles.listCardOwner}>av {list.owner.name} · </span>
             )}
             {list._count.wishes} {list._count.wishes === 1 ? 'ønske' : 'ønsker'}
-            {list.theme && ` · ${THEME_LABELS[list.theme]}`}
+            {list.theme && ` · ${THEMES.find((t) => t.id === list.theme)?.emoji}`}
           </span>
         </div>
       </Link>
