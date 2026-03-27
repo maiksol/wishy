@@ -103,6 +103,11 @@
   margin: 0 0 1.5rem;
 }
 
+.listTitleOwner {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 /* ─── List cards (home page) ─── */
 .listCards {
   list-style: none;

@@ -180,19 +180,16 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
 
         <div className={styles.listTitleRow}>
           <div>
-            <h2 className={styles.listTitle}>{initialList.name}</h2>
+            <h2 className={styles.listTitle}>
+              {!isOwner && <span className={styles.listTitleOwner}>{ownerName} – </span>}
+              {initialList.name}
+            </h2>
             {isOwner && shares.length > 0 && (
               <div className={styles.sharedWithRow}>
                 <span className={styles.sharedWithLabel}>Delt med</span>
                 {shares.map((s) => (
                   <span key={s.userId} className={styles.sharedWithChip}>{s.user.name}</span>
                 ))}
-              </div>
-            )}
-            {!isOwner && (
-              <div className={styles.sharedWithRow}>
-                <span className={styles.sharedWithLabel}>Delt av</span>
-                <span className={styles.sharedWithChip}>{ownerName}</span>
               </div>
             )}
           </div>
