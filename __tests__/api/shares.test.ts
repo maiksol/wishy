@@ -72,7 +72,7 @@ describe('/api/shares', () => {
       expect(res.statusCode).toBe(403)
     })
 
-    it('generates and stores a token for owner', async () => {
+    it('generates and stores a token for owner, returning it in the response', async () => {
       mockSession.mockResolvedValue(SESSION_OWNER)
       mockPrisma.wishList.findUnique.mockResolvedValue(OWNER_LIST)
       mockPrisma.wishList.update.mockResolvedValue({})
@@ -82,6 +82,7 @@ describe('/api/shares', () => {
       expect(mockPrisma.wishList.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.objectContaining({ shareToken: expect.any(String) }) })
       )
+      expect((res._data as { shareToken: string }).shareToken).toMatch(/^[0-9a-f]{48}$/)
     })
   })
 

@@ -5,7 +5,7 @@ import prisma from '../../lib/prisma'
 import crypto from 'crypto'
 
 type ErrorResponse = { error: string }
-type SuccessResponse = { ok: true; listId?: number }
+type SuccessResponse = { ok: true; listId?: number; shareToken?: string }
 
 export default async function handler(
   req: NextApiRequest,
@@ -67,7 +67,7 @@ export default async function handler(
 
     const shareToken = crypto.randomBytes(24).toString('hex')
     await prisma.wishList.update({ where: { id: listId }, data: { shareToken } })
-    return res.status(200).json({ ok: true })
+    return res.status(200).json({ ok: true, shareToken })
   }
 
   // --- revoke-token: remove invite link ---

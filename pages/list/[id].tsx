@@ -1,5 +1,4 @@
 import { useState, FormEvent, useEffect } from 'react'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import type { GetServerSideProps } from 'next'
@@ -7,7 +6,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import type { WishList } from '@prisma/client'
 import Logo from '../../components/Logo'
-import { THEMES, type Theme } from '../../lib/themes'
+import { THEMES, type Theme, parseThemeValue } from '../../lib/themes'
 import styles from '../../styles/Home.module.css'
 
 type ReservationData = {
@@ -42,8 +41,14 @@ type ListPageProps = {
   ownerName: string
 }
 
+const PencilIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 9.5-9.5z" />
+  </svg>
+)
+
 export default function ListPage({ list: initialList, wishes: initialWishes, isOwner, shares: initialShares, currentUserId, ownerName }: ListPageProps) {
-  const router = useRouter()
   const { data: session } = useSession()
 
   const [wishes, setWishes] = useState(initialWishes)
@@ -71,7 +76,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
   // Edit list name/theme
   const [editingList, setEditingList] = useState(false)
   const [editListName, setEditListName] = useState(initialList.name)
-  const [editListTheme, setEditListTheme] = useState<Theme>((initialList?.theme ?? null) as Theme)
+  const [editListTheme, setEditListTheme] = useState<Theme>((initialList.theme ?? null) as Theme)
   const [editListLoading, setEditListLoading] = useState(false)
   const [listName, setListName] = useState(initialList.name)
 
@@ -96,11 +101,11 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
       body: JSON.stringify({ title, description, url, listId: initialList.id }),
     })
     if (res.ok) {
+      const newWish = await res.json()
       setTitle('')
       setDescription('')
       setUrl('')
-      const r = await fetch(`/api/wishlist?listId=${initialList.id}`)
-      setWishes(await r.json())
+      setWishes((prev) => [newWish, ...prev])
     }
     setAddLoading(false)
   }
@@ -145,9 +150,8 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
       body: JSON.stringify({ action: 'generate-token', listId: initialList.id }),
     })
     if (res.ok) {
-      const r = await fetch(`/api/lists?id=${initialList.id}`)
-      const updated = await r.json()
-      setShareToken(updated.shareToken)
+      const data = await res.json()
+      setShareToken(data.shareToken)
     }
     setTokenLoading(false)
   }
@@ -250,7 +254,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                   <select
                     className={styles.themeSelect}
                     value={String(editListTheme)}
-                    onChange={(e) => setEditListTheme((e.target.value === 'null' ? null : e.target.value) as Theme)}
+                    onChange={(e) => setEditListTheme(parseThemeValue(e.target.value))}
                   >
                     {THEMES.map((t) => (
                       <option key={String(t.id)} value={String(t.id)}>
@@ -281,10 +285,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                       onClick={() => { setEditListName(listName); setEditListTheme(theme); setEditingList(true) }}
                       aria-label="Rediger listenavn"
                     >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 9.5-9.5z" />
-                      </svg>
+                      {PencilIcon}
                     </button>
                   )}
                 </div>
@@ -521,10 +522,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                             onClick={() => startEditWish(wish)}
                             aria-label={`Rediger ${wish.title}`}
                           >
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M12 20h9" />
-                              <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 9.5-9.5z" />
-                            </svg>
+                            {PencilIcon}
                           </button>
                           <button
                             className={styles.deleteButton}
@@ -564,16 +562,18 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const userId = session.user.id
 
-  const list = await prisma.wishList.findUnique({
-    where: { id: listId },
-    include: { owner: { select: { name: true } } },
-  })
+  const [list, share] = await Promise.all([
+    prisma.wishList.findUnique({
+      where: { id: listId },
+      include: { owner: { select: { name: true } } },
+    }),
+    prisma.wishListShare.findUnique({
+      where: { listId_userId: { listId, userId } },
+    }),
+  ])
   if (!list) return { notFound: true }
 
   const isOwner = list.ownerId === userId
-  const share = await prisma.wishListShare.findUnique({
-    where: { listId_userId: { listId, userId } },
-  })
   if (!isOwner && !share) return { notFound: true }
 
   const wishesRaw = await prisma.wish.findMany({

@@ -7,7 +7,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]'
 import type { WishList } from '@prisma/client'
 import Logo from '../components/Logo'
-import { THEMES, type Theme } from '../lib/themes'
+import { THEMES, type Theme, parseThemeValue } from '../lib/themes'
 import styles from '../styles/Home.module.css'
 
 type ListWithMeta = WishList & {
@@ -16,11 +16,6 @@ type ListWithMeta = WishList & {
   shareToken: string | null
 }
 
-const THEME_COLORS: Record<string, string> = {
-  jul: '#2d7a4f',
-  bursdag: '#f59e0b',
-  bryllup: '#b5924a',
-}
 
 function ListCard({
   list,
@@ -47,8 +42,7 @@ function ListCard({
         body: JSON.stringify({ action: 'generate-token', listId: list.id }),
       })
       if (res.ok) {
-        const updated = await fetch(`/api/lists?id=${list.id}`)
-        const data = await updated.json()
+        const data = await res.json()
         token = data.shareToken
         setShareToken(token)
       }
@@ -73,7 +67,7 @@ function ListCard({
       <Link href={`/list/${list.id}`} className={styles.listCard}>
         <div
           className={styles.listCardAccent}
-          style={{ background: list.theme ? THEME_COLORS[list.theme] : 'var(--primary)' }}
+          style={{ background: THEMES.find((t) => t.id === list.theme)?.color ?? 'var(--primary)' }}
         />
         <div className={styles.listCardBody}>
           <span className={styles.listCardName}>
@@ -189,7 +183,7 @@ export default function Home({ initialLists, currentUserId }: { initialLists: Li
             <select
               className={styles.themeSelect}
               value={String(theme)}
-              onChange={(e) => setTheme((e.target.value === 'null' ? null : e.target.value) as Theme)}
+              onChange={(e) => setTheme(parseThemeValue(e.target.value))}
             >
               {THEMES.map((t) => (
                 <option key={String(t.id)} value={String(t.id)}>
