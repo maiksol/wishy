@@ -12,6 +12,8 @@ export default function Registrer() {
   const router = useRouter()
   const token = router.query.token as string | undefined
   const callbackUrl = router.query.callbackUrl as string | undefined
+  const listName = router.query.listName as string | undefined
+  const ownerName = router.query.ownerName as string | undefined
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -63,7 +65,11 @@ export default function Registrer() {
           </div>
           <h1 className={styles.authTitle}>Opprett konto</h1>
           {token && (
-            <p className={styles.authHint}>Du er invitert til å se en ønskeliste!</p>
+            <p className={styles.authHint}>
+              {ownerName && listName
+                ? `${ownerName} vil dele «${listName}» med deg.`
+                : 'Du er invitert til å se en ønskeliste!'}
+            </p>
           )}
           <form onSubmit={handleSubmit} className={styles.authForm}>
             <input

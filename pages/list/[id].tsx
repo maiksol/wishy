@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
@@ -58,11 +58,15 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
 
   // Share panel
   const [showSharePanel, setShowSharePanel] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteError, setInviteError] = useState('')
-  const [inviteLoading, setInviteLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [tokenLoading, setTokenLoading] = useState(false)
+
+  // Auto-generate invite token when panel opens for the first time
+  useEffect(() => {
+    if (showSharePanel && !shareToken) {
+      generateToken()
+    }
+  }, [showSharePanel])
 
   const theme = (initialList?.theme ?? null) as Theme
   const activeTheme = THEMES.find((t) => t.id === theme) ?? THEMES[0]
@@ -145,34 +149,16 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
     setTokenLoading(false)
   }
 
-  function copyInviteLink() {
+  async function shareInviteLink() {
     if (!shareToken) return
-    const link = `${window.location.origin}/invite?token=${shareToken}`
-    navigator.clipboard.writeText(link).then(() => {
+    const url = `${window.location.origin}/invite?token=${shareToken}`
+    if (navigator.share) {
+      await navigator.share({ url, title: `${initialList.name} – Wishy` }).catch(() => null)
+    } else {
+      await navigator.clipboard.writeText(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    })
-  }
-
-  async function addByEmail(e: FormEvent) {
-    e.preventDefault()
-    if (!inviteEmail.trim()) return
-    setInviteLoading(true)
-    setInviteError('')
-    const res = await fetch('/api/shares', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'add', listId: initialList.id, email: inviteEmail.trim() }),
-    })
-    if (res.ok) {
-      setInviteEmail('')
-      // Refresh shares list
-      router.replace(router.asPath)
-    } else {
-      const data = await res.json()
-      setInviteError(data.error ?? 'Noe gikk galt')
     }
-    setInviteLoading(false)
   }
 
   async function removeMember(targetUserId: number) {
@@ -233,47 +219,25 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
           <div className={styles.sharePanel}>
             <h3 className={styles.sharePanelTitle}>Del listen</h3>
 
-            {/* Invite link */}
+            {/* Invite link + share button */}
             <div className={styles.sharePanelSection}>
-              <p className={styles.sharePanelLabel}>Invitasjonslenke</p>
-              {shareToken ? (
+              {tokenLoading ? (
+                <p className={styles.sharePanelLabel}>Genererer lenke…</p>
+              ) : shareToken ? (
                 <div className={styles.inviteLinkRow}>
                   <span className={styles.inviteLink}>
                     {typeof window !== 'undefined'
                       ? `${window.location.origin}/invite?token=${shareToken}`
                       : `/invite?token=${shareToken}`}
                   </span>
-                  <button className={styles.copyButton} onClick={copyInviteLink}>
-                    {copied ? '✓ Kopiert' : 'Kopier'}
+                  <button className={styles.copyButton} onClick={shareInviteLink}>
+                    {copied ? '✓ Kopiert' : (typeof navigator !== 'undefined' && 'share' in navigator ? 'Del' : 'Kopier')}
                   </button>
                   <button className={styles.revokeButton} onClick={revokeToken} disabled={tokenLoading}>
                     Trekk tilbake
                   </button>
                 </div>
-              ) : (
-                <button className={styles.generateButton} onClick={generateToken} disabled={tokenLoading}>
-                  {tokenLoading ? 'Genererer…' : 'Generer lenke'}
-                </button>
-              )}
-            </div>
-
-            {/* Add by email */}
-            <div className={styles.sharePanelSection}>
-              <p className={styles.sharePanelLabel}>Inviter via e-post</p>
-              <form onSubmit={addByEmail} className={styles.inviteForm}>
-                <input
-                  className={styles.input}
-                  type="email"
-                  placeholder="E-postadresse"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
-                />
-                <button className={styles.button} type="submit" disabled={inviteLoading}>
-                  {inviteLoading ? '…' : 'Legg til'}
-                </button>
-              </form>
-              {inviteError && <p className={styles.authError}>{inviteError}</p>}
+              ) : null}
             </div>
 
             {/* Member list */}
