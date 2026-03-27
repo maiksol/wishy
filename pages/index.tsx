@@ -54,8 +54,8 @@ function ListCard({
             {!isOwner && (
               <span className={styles.listCardOwner}>av {list.owner.name} · </span>
             )}
+            {list.theme && `${THEMES.find((t) => t.id === list.theme)?.emoji} `}
             {list._count.wishes} {list._count.wishes === 1 ? 'ønske' : 'ønsker'}
-            {list.theme && ` · ${THEMES.find((t) => t.id === list.theme)?.emoji}`}
           </span>
         </div>
       </Link>
