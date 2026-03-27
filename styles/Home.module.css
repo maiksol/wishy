@@ -362,7 +362,7 @@
 /* ─── Wish item ─── */
 .item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   background: var(--surface);
@@ -946,7 +946,7 @@
 /* ─── Edit wish ─── */
 .itemActions {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   flex-shrink: 0;
 }
 
