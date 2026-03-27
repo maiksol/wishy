@@ -1,4 +1,4 @@
-import { useState, FormEvent, MouseEvent } from 'react'
+import { useState, FormEvent, MouseEvent, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSession, signOut } from 'next-auth/react'
@@ -13,6 +13,7 @@ import styles from '../styles/Home.module.css'
 type ListWithMeta = WishList & {
   _count: { wishes: number; shares: number }
   owner: { name: string }
+  shareToken: string | null
 }
 
 const THEME_COLORS: Record<string, string> = {
@@ -30,6 +31,43 @@ function ListCard({
   isOwner: boolean
   onDelete?: (e: MouseEvent<HTMLButtonElement>, id: number) => void
 }) {
+  const [shareToken, setShareToken] = useState(list.shareToken)
+  const [shareLoading, setShareLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = useCallback(async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    setShareLoading(true)
+
+    let token = shareToken
+    if (!token) {
+      const res = await fetch('/api/shares', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate-token', listId: list.id }),
+      })
+      if (res.ok) {
+        const updated = await fetch(`/api/lists?id=${list.id}`)
+        const data = await updated.json()
+        token = data.shareToken
+        setShareToken(token)
+      }
+    }
+
+    setShareLoading(false)
+    if (!token) return
+
+    const url = `${window.location.origin}/invite?token=${token}`
+    const nav = navigator as Navigator & { share?: (d: { url: string; title: string }) => Promise<void> }
+    if (nav.share) {
+      await nav.share({ url, title: `${list.name} – Wishy` }).catch(() => null)
+    } else {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }, [shareToken, list.id, list.name])
+
   return (
     <li className={styles.listCardWrapper}>
       <Link href={`/list/${list.id}`} className={styles.listCard}>
@@ -59,6 +97,25 @@ function ListCard({
           </span>
         </div>
       </Link>
+      {isOwner && (
+        <button
+          className={styles.listCardShare}
+          onClick={handleShare}
+          disabled={shareLoading}
+          aria-label={`Del ${list.name}`}
+        >
+          {copied ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : shareLoading ? '…' : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+          )}
+        </button>
+      )}
       {isOwner && onDelete && (
         <button
           className={styles.listCardDelete}

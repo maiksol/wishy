@@ -165,6 +165,32 @@
 }
 
 
+.listCardShare {
+  flex-shrink: 0;
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.listCardShare:hover:not(:disabled) {
+  color: var(--primary);
+  background: var(--primary-subtle);
+}
+
+.listCardShare:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .listCardDelete {
   flex-shrink: 0;
   align-self: center;
