@@ -76,11 +76,11 @@ function ListCard({
           style={{ background: list.theme ? THEME_COLORS[list.theme] : 'var(--primary)' }}
         />
         <div className={styles.listCardBody}>
-          <span className={styles.listCardName}>{list.name}</span>
+          <span className={styles.listCardName}>
+            {list.name}
+            {!isOwner && <span className={styles.listCardOwner}> – {list.owner.name}</span>}
+          </span>
           <span className={styles.listCardMeta}>
-            {!isOwner && (
-              <span className={styles.listCardOwner}>av {list.owner.name} · </span>
-            )}
             {list.theme && `${THEMES.find((t) => t.id === list.theme)?.emoji} `}
             {list._count.wishes} {list._count.wishes === 1 ? 'ønske' : 'ønsker'}
             {isOwner && list._count.shares > 0 && ` · delt med ${list._count.shares}`}

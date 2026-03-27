@@ -457,7 +457,8 @@
 }
 
 .listCardOwner {
-  font-style: italic;
+  font-weight: 400;
+  color: var(--text-muted);
 }
 
 /* ─── Invite landing page ─── */
