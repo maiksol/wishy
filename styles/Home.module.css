@@ -1063,7 +1063,7 @@
 /* ─── Mobile ─── */
 @media (max-width: 600px) {
   .inner {
-    padding: calc(2rem + env(safe-area-inset-top)) 1rem calc(3rem + env(safe-area-inset-bottom));
+    padding: calc(3.5rem + env(safe-area-inset-top)) 1rem calc(3rem + env(safe-area-inset-bottom));
   }
 
   .inlineForm {
