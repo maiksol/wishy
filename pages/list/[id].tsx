@@ -39,9 +39,10 @@ type ListPageProps = {
   isOwner: boolean
   shares: ShareMember[]
   currentUserId: number
+  ownerName: string
 }
 
-export default function ListPage({ list: initialList, wishes: initialWishes, isOwner, shares: initialShares, currentUserId }: ListPageProps) {
+export default function ListPage({ list: initialList, wishes: initialWishes, isOwner, shares: initialShares, currentUserId, ownerName }: ListPageProps) {
   const router = useRouter()
   const { data: session } = useSession()
 
@@ -200,6 +201,12 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                 {shares.map((s) => (
                   <span key={s.userId} className={styles.sharedWithChip}>{s.user.name}</span>
                 ))}
+              </div>
+            )}
+            {!isOwner && (
+              <div className={styles.sharedWithRow}>
+                <span className={styles.sharedWithLabel}>Delt av</span>
+                <span className={styles.sharedWithChip}>{ownerName}</span>
               </div>
             )}
           </div>
@@ -437,7 +444,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const userId = session.user.id
 
-  const list = await prisma.wishList.findUnique({ where: { id: listId } })
+  const list = await prisma.wishList.findUnique({
+    where: { id: listId },
+    include: { owner: { select: { name: true } } },
+  })
   if (!list) return { notFound: true }
 
   const isOwner = list.ownerId === userId
@@ -474,6 +484,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       list: JSON.parse(JSON.stringify(list)),
       wishes: JSON.parse(JSON.stringify(wishes)),
       isOwner,
+      ownerName: list.owner.name,
       shares: JSON.parse(JSON.stringify(shares)),
       currentUserId: userId,
     },
