@@ -76,24 +76,14 @@ function ListCard({
           style={{ background: list.theme ? THEME_COLORS[list.theme] : 'var(--primary)' }}
         />
         <div className={styles.listCardBody}>
-          <div className={styles.listCardNameRow}>
-            <span className={styles.listCardName}>{list.name}</span>
-            {isOwner && list._count.shares > 0 && (
-              <span className={styles.sharedBadge}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                </svg>
-                {list._count.shares} {list._count.shares === 1 ? 'deler' : 'deler'}
-              </span>
-            )}
-          </div>
+          <span className={styles.listCardName}>{list.name}</span>
           <span className={styles.listCardMeta}>
             {!isOwner && (
               <span className={styles.listCardOwner}>av {list.owner.name} · </span>
             )}
             {list.theme && `${THEMES.find((t) => t.id === list.theme)?.emoji} `}
             {list._count.wishes} {list._count.wishes === 1 ? 'ønske' : 'ønsker'}
+            {isOwner && list._count.shares > 0 && ` · delt med ${list._count.shares}`}
           </span>
         </div>
       </Link>
