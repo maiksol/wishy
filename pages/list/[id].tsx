@@ -458,19 +458,25 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                   ) : (
                     <>
                       <div className={styles.itemContent}>
-                        <span className={styles.itemTitle}>{wish.title}</span>
+                        <div className={styles.itemTitleRow}>
+                          <span className={styles.itemTitle}>{wish.title}</span>
+                          {wish.url && (
+                            <a
+                              className={styles.itemLinkIcon}
+                              href={wish.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`Åpne lenke for ${wish.title}`}
+                            >
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                              </svg>
+                            </a>
+                          )}
+                        </div>
                         {wish.description && (
                           <span className={styles.itemDescription}>{wish.description}</span>
-                        )}
-                        {wish.url && (
-                          <a
-                            className={styles.itemUrl}
-                            href={wish.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Se produkt →
-                          </a>
                         )}
 
                         {/* Reservation controls — viewer only */}
@@ -514,30 +520,31 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                         )}
                       </div>
 
-                      {/* Edit + Delete buttons — owner only */}
-                      {isOwner && (
-                        <div className={styles.itemActions}>
-                          <button
-                            className={styles.editButton}
-                            onClick={() => startEditWish(wish)}
-                            aria-label={`Rediger ${wish.title}`}
-                          >
-                            {PencilIcon}
-                          </button>
-                          <button
-                            className={styles.deleteButton}
-                            onClick={() => deleteWish(wish.id)}
-                            aria-label={`Slett ${wish.title}`}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                              <path d="M10 11v6M14 11v6" />
-                              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
+                      <div className={styles.itemActions}>
+                        {isOwner && (
+                          <>
+                            <button
+                              className={styles.editButton}
+                              onClick={() => startEditWish(wish)}
+                              aria-label={`Rediger ${wish.title}`}
+                            >
+                              {PencilIcon}
+                            </button>
+                            <button
+                              className={styles.deleteButton}
+                              onClick={() => deleteWish(wish.id)}
+                              aria-label={`Slett ${wish.title}`}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                              </svg>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </>
                   )}
                 </li>

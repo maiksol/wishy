@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.25);
   transform: rotate(-8deg);
   transition: background 0.35s ease, transform 0.2s ease;
 }
@@ -35,10 +35,10 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--primary);
+  background: #f59e0b;
   border: 2.5px solid var(--bg);
-  opacity: 0.85;
-  transition: background 0.35s ease, border-color 0.35s ease;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.5);
+  transition: border-color 0.35s ease;
 }
 
 .wordmark {
@@ -54,12 +54,13 @@
 }
 
 .accent {
-  font-size: 1rem;
-  color: var(--primary);
+  font-size: 1.3rem;
+  color: #f59e0b;
+  -webkit-text-fill-color: #f59e0b;
   font-weight: 400;
   letter-spacing: 0;
   margin-left: 0.05em;
-  transition: color 0.35s ease;
   position: relative;
-  top: -0.15em;
+  top: -0.2em;
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
 }
