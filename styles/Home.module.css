@@ -953,13 +953,8 @@
   border-radius: 4px;
   display: flex;
   align-items: center;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s;
+  transition: color 0.15s;
   flex-shrink: 0;
-}
-
-.item:hover .editButton {
-  opacity: 1;
 }
 
 .editButton:hover {
