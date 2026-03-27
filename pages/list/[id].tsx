@@ -273,10 +273,24 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
               </div>
             ) : (
               <>
-                <h2 className={styles.listTitle}>
-                  {listName}
-                  {!isOwner && <span className={styles.listTitleOwner}> – {ownerName}</span>}
-                </h2>
+                <div className={styles.listTitleEditRow}>
+                  <h2 className={styles.listTitle}>
+                    {listName}
+                    {!isOwner && <span className={styles.listTitleOwner}> – {ownerName}</span>}
+                  </h2>
+                  {isOwner && (
+                    <button
+                      className={styles.listTitleEditButton}
+                      onClick={() => { setEditListName(listName); setEditListTheme(theme); setEditingList(true) }}
+                      aria-label="Rediger listenavn"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 {isOwner && shares.length > 0 && (
                   <div className={styles.sharedWithRow}>
                     <span className={styles.sharedWithLabel}>Delt med</span>
@@ -288,33 +302,21 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
               </>
             )}
           </div>
-          {isOwner && !editingList && (
-            <div className={styles.listTitleActions}>
-              <button
-                className={styles.listTitleEditButton}
-                onClick={() => { setEditListName(listName); setEditListTheme(theme); setEditingList(true) }}
-                aria-label="Rediger listenavn"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </button>
-              <button
-                className={styles.shareToggleButton}
-                onClick={() => setShowSharePanel((v) => !v)}
-                aria-expanded={showSharePanel}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="18" cy="5" r="3" />
-                  <circle cx="6" cy="12" r="3" />
-                  <circle cx="18" cy="19" r="3" />
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                </svg>
-                Del
-              </button>
-            </div>
+          {isOwner && (
+            <button
+              className={styles.shareToggleButton}
+              onClick={() => setShowSharePanel((v) => !v)}
+              aria-expanded={showSharePanel}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              Del
+            </button>
           )}
         </div>
 

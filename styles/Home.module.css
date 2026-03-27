@@ -945,23 +945,20 @@
 
 /* ─── Edit wish ─── */
 .editButton {
-  flex-shrink: 0;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  min-width: 44px;
-  min-height: 44px;
+  padding: 0.25rem;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s;
+  flex-shrink: 0;
 }
 
 .editButton:hover {
   color: var(--primary);
-  background: var(--primary-subtle);
 }
 
 .editWishForm {
@@ -1021,31 +1018,27 @@
 }
 
 /* ─── Edit list name / theme ─── */
-.listTitleActions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  flex-shrink: 0;
-}
-
 .listTitleEditButton {
-  flex-shrink: 0;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  min-width: 36px;
-  min-height: 36px;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s;
+  flex-shrink: 0;
 }
 
 .listTitleEditButton:hover {
   color: var(--primary);
-  background: var(--primary-subtle);
+}
+
+.listTitleEditRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .listNameInput {
