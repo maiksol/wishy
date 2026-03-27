@@ -399,6 +399,44 @@
   background: var(--primary-subtle);
 }
 
+/* ─── List sections ─── */
+.listSection {
+  margin-bottom: 2rem;
+}
+
+.listSectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0 0 0.6rem 0.25rem;
+}
+
+/* ─── List card name row ─── */
+.listCardNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sharedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border-radius: 99px;
+  padding: 0.15rem 0.55rem;
+  flex-shrink: 0;
+}
+
+.listCardOwner {
+  font-style: italic;
+}
+
 /* ─── Auth pages ─── */
 .authPage {
   display: flex;

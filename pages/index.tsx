@@ -10,7 +10,10 @@ import Logo from '../components/Logo'
 import { THEMES, type Theme } from '../lib/themes'
 import styles from '../styles/Home.module.css'
 
-type ListWithCount = WishList & { _count: { wishes: number } }
+type ListWithMeta = WishList & {
+  _count: { wishes: number; shares: number }
+  owner: { name: string }
+}
 
 const THEME_LABELS: Record<string, string> = {
   jul: '🎄 Jul',
@@ -24,13 +27,72 @@ const THEME_COLORS: Record<string, string> = {
   bryllup: '#b5924a',
 }
 
-export default function Home({ initialLists }: { initialLists: ListWithCount[] }) {
+function ListCard({
+  list,
+  isOwner,
+  onDelete,
+}: {
+  list: ListWithMeta
+  isOwner: boolean
+  onDelete?: (e: MouseEvent<HTMLButtonElement>, id: number) => void
+}) {
+  return (
+    <li className={styles.listCardWrapper}>
+      <Link href={`/list/${list.id}`} className={styles.listCard}>
+        <div
+          className={styles.listCardAccent}
+          style={{ background: list.theme ? THEME_COLORS[list.theme] : 'var(--primary)' }}
+        />
+        <div className={styles.listCardBody}>
+          <div className={styles.listCardNameRow}>
+            <span className={styles.listCardName}>{list.name}</span>
+            {isOwner && list._count.shares > 0 && (
+              <span className={styles.sharedBadge}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                {list._count.shares} {list._count.shares === 1 ? 'deler' : 'deler'}
+              </span>
+            )}
+          </div>
+          <span className={styles.listCardMeta}>
+            {!isOwner && (
+              <span className={styles.listCardOwner}>av {list.owner.name} · </span>
+            )}
+            {list._count.wishes} {list._count.wishes === 1 ? 'ønske' : 'ønsker'}
+            {list.theme && ` · ${THEME_LABELS[list.theme]}`}
+          </span>
+        </div>
+      </Link>
+      {isOwner && onDelete && (
+        <button
+          className={styles.listCardDelete}
+          onClick={(e) => onDelete(e, list.id)}
+          aria-label={`Slett ${list.name}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+            <path d="M10 11v6M14 11v6" />
+            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+          </svg>
+        </button>
+      )}
+    </li>
+  )
+}
+
+export default function Home({ initialLists, currentUserId }: { initialLists: ListWithMeta[]; currentUserId: number }) {
   const router = useRouter()
   const { data: session } = useSession()
-  const [lists, setLists] = useState<ListWithCount[]>(initialLists)
+  const [lists, setLists] = useState<ListWithMeta[]>(initialLists)
   const [name, setName] = useState('')
   const [theme, setTheme] = useState<Theme>(null)
   const [loading, setLoading] = useState(false)
+
+  const myLists = lists.filter((l) => l.ownerId === currentUserId)
+  const sharedLists = lists.filter((l) => l.ownerId !== currentUserId)
 
   async function createList(e: FormEvent) {
     e.preventDefault()
@@ -101,46 +163,36 @@ export default function Home({ initialLists }: { initialLists: ListWithCount[] }
           </button>
         </form>
 
-        <ul className={styles.listCards}>
-          {lists.length === 0 ? (
-            <li className={styles.emptyState}>
-              <span className={styles.emptyEmoji}>✨</span>
-              <p className={styles.emptyText}>Ingen lister ennå.{'\n'}Opprett din første!</p>
-            </li>
-          ) : (
-            lists.map((list) => (
-              <li key={list.id} className={styles.listCardWrapper}>
-                <Link href={`/list/${list.id}`} className={styles.listCard}>
-                  <div
-                    className={styles.listCardAccent}
-                    style={{
-                      background: list.theme ? THEME_COLORS[list.theme] : 'var(--primary)',
-                    }}
-                  />
-                  <div className={styles.listCardBody}>
-                    <span className={styles.listCardName}>{list.name}</span>
-                    <span className={styles.listCardMeta}>
-                      {list._count.wishes} {list._count.wishes === 1 ? 'ønske' : 'ønsker'}
-                      {list.theme && ` · ${THEME_LABELS[list.theme]}`}
-                    </span>
-                  </div>
-                </Link>
-                <button
-                  className={styles.listCardDelete}
-                  onClick={(e) => deleteList(e, list.id)}
-                  aria-label={`Slett ${list.name}`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                    <path d="M10 11v6M14 11v6" />
-                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                  </svg>
-                </button>
-              </li>
-            ))
+        {/* My lists */}
+        <section className={styles.listSection}>
+          {(myLists.length > 0 || sharedLists.length > 0) && (
+            <h2 className={styles.listSectionTitle}>Mine lister</h2>
           )}
-        </ul>
+          <ul className={styles.listCards}>
+            {myLists.length === 0 ? (
+              <li className={styles.emptyState}>
+                <span className={styles.emptyEmoji}>✨</span>
+                <p className={styles.emptyText}>Ingen lister ennå.{'\n'}Opprett din første!</p>
+              </li>
+            ) : (
+              myLists.map((list) => (
+                <ListCard key={list.id} list={list} isOwner={true} onDelete={deleteList} />
+              ))
+            )}
+          </ul>
+        </section>
+
+        {/* Shared with me */}
+        {sharedLists.length > 0 && (
+          <section className={styles.listSection}>
+            <h2 className={styles.listSectionTitle}>Delt med meg</h2>
+            <ul className={styles.listCards}>
+              {sharedLists.map((list) => (
+                <ListCard key={list.id} list={list} isOwner={false} />
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
     </div>
   )
@@ -157,8 +209,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       OR: [{ ownerId: userId }, { shares: { some: { userId } } }],
     },
     orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { wishes: true } } },
+    include: {
+      _count: { select: { wishes: true, shares: true } },
+      owner: { select: { name: true } },
+    },
   })
 
-  return { props: { initialLists: JSON.parse(JSON.stringify(lists)) } }
+  return { props: { initialLists: JSON.parse(JSON.stringify(lists)), currentUserId: userId } }
 }
