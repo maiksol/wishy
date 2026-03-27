@@ -239,7 +239,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
           <div>
             {isOwner && editingList ? (
               <div className={styles.editWishForm}>
-                <div className={styles.listTitleEditRow}>
+                <div className={styles.nameThemeRow}>
                   <input
                     className={styles.listNameInput}
                     type="text"
@@ -247,20 +247,17 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                     onChange={(e) => setEditListName(e.target.value)}
                     autoFocus
                   />
-                </div>
-                <div className={styles.themeRow}>
-                  {THEMES.map((t) => (
-                    <button
-                      key={String(t.id)}
-                      type="button"
-                      className={[styles.themeCard, editListTheme === t.id ? styles.themeCardActive : ''].join(' ')}
-                      onClick={() => setEditListTheme(t.id)}
-                      aria-pressed={editListTheme === t.id}
-                    >
-                      <span className={styles.themeEmoji}>{t.emoji}</span>
-                      <span className={styles.themeName}>{t.label}</span>
-                    </button>
-                  ))}
+                  <select
+                    className={styles.themeSelect}
+                    value={String(editListTheme)}
+                    onChange={(e) => setEditListTheme((e.target.value === 'null' ? null : e.target.value) as Theme)}
+                  >
+                    {THEMES.map((t) => (
+                      <option key={String(t.id)} value={String(t.id)}>
+                        {t.emoji} {t.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className={styles.editWishActions}>
                   <button className={styles.saveButton} onClick={saveEditList} disabled={editListLoading || !editListName.trim()}>

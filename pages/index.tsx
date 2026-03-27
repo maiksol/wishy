@@ -177,27 +177,26 @@ export default function Home({ initialLists, currentUserId }: { initialLists: Li
         </header>
 
         <form onSubmit={createList} className={styles.form}>
-          <input
-            className={styles.input}
-            type="text"
-            placeholder="Navn på liste…"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <div className={styles.themeRow}>
-            {THEMES.map((t) => (
-              <button
-                key={String(t.id)}
-                type="button"
-                className={[styles.themeCard, theme === t.id ? styles.themeCardActive : ''].join(' ')}
-                onClick={() => setTheme(t.id)}
-                aria-pressed={theme === t.id}
-              >
-                <span className={styles.themeEmoji}>{t.emoji}</span>
-                <span className={styles.themeName}>{t.label}</span>
-              </button>
-            ))}
+          <div className={styles.nameThemeRow}>
+            <input
+              className={styles.input}
+              type="text"
+              placeholder="Navn på liste…"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <select
+              className={styles.themeSelect}
+              value={String(theme)}
+              onChange={(e) => setTheme((e.target.value === 'null' ? null : e.target.value) as Theme)}
+            >
+              {THEMES.map((t) => (
+                <option key={String(t.id)} value={String(t.id)}>
+                  {t.emoji} {t.label}
+                </option>
+              ))}
+            </select>
           </div>
           <button className={styles.button} type="submit" disabled={loading || !name.trim()}>
             {loading ? '…' : 'Opprett liste'}
