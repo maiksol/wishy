@@ -8,16 +8,16 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email:    { label: 'E-post', type: 'email' },
-        password: { label: 'Passord', type: 'password' },
+        email: { label: 'E-post', type: 'email' },
+        pin:   { label: 'PIN', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null
+        if (!credentials?.email || !credentials.pin) return null
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.toLowerCase().trim() },
         })
         if (!user) return null
-        const valid = await compare(credentials.password, user.passwordHash)
+        const valid = await compare(credentials.pin, user.passwordHash)
         if (!valid) return null
         return { id: user.id, name: user.name, email: user.email }
       },

@@ -10,23 +10,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).end()
   }
 
-  const { name, email, password, token } = req.body as {
+  const { name, email, pin, token } = req.body as {
     name?: string
     email?: string
-    password?: string
+    pin?: string
     token?: string
   }
 
   if (!name?.trim()) return res.status(400).json({ error: 'Navn er påkrevd' })
   if (!email?.trim()) return res.status(400).json({ error: 'E-post er påkrevd' })
-  if (!password || password.length < 8)
-    return res.status(400).json({ error: 'Passordet må være minst 8 tegn' })
+  if (!pin || !/^\d{4}$/.test(pin))
+    return res.status(400).json({ error: 'PIN-koden må være 4 siffer' })
 
   const normalizedEmail = email.toLowerCase().trim()
   const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } })
   if (existing) return res.status(409).json({ error: 'E-post er allerede i bruk' })
 
-  const passwordHash = await hash(password, 10)
+  const passwordHash = await hash(pin, 10)
   const user = await prisma.user.create({
     data: { name: name.trim(), email: normalizedEmail, passwordHash },
   })

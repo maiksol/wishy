@@ -11,7 +11,7 @@ import styles from '../styles/Home.module.css'
 export default function LoggInn() {
   const router = useRouter()
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [pin, setPin] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -25,7 +25,7 @@ export default function LoggInn() {
     try {
       const result = await signIn('credentials', {
         email,
-        password,
+        pin,
         redirect: false,
       })
       if (result?.error) {
@@ -61,9 +61,12 @@ export default function LoggInn() {
             <input
               className={styles.input}
               type="password"
-              placeholder="Passord"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              inputMode="numeric"
+              pattern="[0-9]{4}"
+              maxLength={4}
+              placeholder="4-sifret PIN-kode"
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
               required
               autoComplete="current-password"
             />

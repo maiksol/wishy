@@ -15,7 +15,7 @@ export default function Registrer() {
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [pin, setPin] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -28,7 +28,7 @@ export default function Registrer() {
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, token }),
+        body: JSON.stringify({ name, email, pin, token }),
       })
 
       if (!res.ok) {
@@ -38,7 +38,7 @@ export default function Registrer() {
       }
 
       const data = await res.json()
-      await signIn('credentials', { email, password, redirect: false })
+      await signIn('credentials', { email, pin, redirect: false })
 
       if (data.listId) {
         router.push(`/list/${data.listId}`)
@@ -87,9 +87,12 @@ export default function Registrer() {
             <input
               className={styles.input}
               type="password"
-              placeholder="Passord (minst 8 tegn)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              inputMode="numeric"
+              pattern="[0-9]{4}"
+              maxLength={4}
+              placeholder="4-sifret PIN-kode"
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
               required
               autoComplete="new-password"
             />
