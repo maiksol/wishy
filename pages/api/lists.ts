@@ -55,10 +55,14 @@ export default async function handler(
     const list = await prisma.wishList.findUnique({ where: { id: Number(id) } })
     if (!list) return res.status(404).json({ error: 'Liste ikke funnet' })
     if (list.ownerId !== userId) return res.status(403).json({ error: 'Ingen tilgang' })
-    const { theme } = req.body as { theme?: string | null }
+    const { name, theme } = req.body as { name?: string; theme?: string | null }
+    if (name !== undefined && !name.trim()) return res.status(400).json({ error: 'Navn kan ikke være tomt' })
     const updated = await prisma.wishList.update({
       where: { id: Number(id) },
-      data: { theme: theme ?? null },
+      data: {
+        ...(name !== undefined && { name: name.trim() }),
+        ...(theme !== undefined && { theme: theme ?? null }),
+      },
     })
     return res.status(200).json(updated)
   }

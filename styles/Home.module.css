@@ -943,6 +943,126 @@
   color: var(--text);
 }
 
+/* ─── Edit wish ─── */
+.editButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.item:hover .editButton {
+  opacity: 1;
+}
+
+.editButton:hover {
+  color: var(--primary);
+}
+
+.editWishForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.editWishForm .input {
+  font-size: 0.9rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.editWishActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.saveButton {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 32px;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.saveButton:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  min-height: 32px;
+}
+
+.cancelButton:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+/* ─── Edit list name / theme ─── */
+.listTitleEditButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.listTitleEditButton:hover {
+  color: var(--primary);
+}
+
+.listTitleEditRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.listNameInput {
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+  max-width: 340px;
+}
+
+.listNameInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 /* ─── Mobile ─── */
 @media (max-width: 600px) {
   .inner {

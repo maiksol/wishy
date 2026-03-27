@@ -61,6 +61,20 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
   const [copied, setCopied] = useState(false)
   const [tokenLoading, setTokenLoading] = useState(false)
 
+  // Edit wish
+  const [editingWishId, setEditingWishId] = useState<number | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editUrl, setEditUrl] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+
+  // Edit list name/theme
+  const [editingList, setEditingList] = useState(false)
+  const [editListName, setEditListName] = useState(initialList.name)
+  const [editListTheme, setEditListTheme] = useState<Theme>((initialList?.theme ?? null) as Theme)
+  const [editListLoading, setEditListLoading] = useState(false)
+  const [listName, setListName] = useState(initialList.name)
+
   // Auto-generate invite token when panel opens for the first time
   useEffect(() => {
     if (showSharePanel && !shareToken) {
@@ -161,6 +175,49 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
     }
   }
 
+  function startEditWish(wish: WishWithReservation) {
+    setEditingWishId(wish.id)
+    setEditTitle(wish.title)
+    setEditDescription(wish.description ?? '')
+    setEditUrl(wish.url ?? '')
+  }
+
+  async function saveEditWish(wishId: number) {
+    if (!editTitle.trim()) return
+    setEditLoading(true)
+    const res = await fetch(`/api/wishlist?id=${wishId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: editTitle, description: editDescription, url: editUrl }),
+    })
+    if (res.ok) {
+      setWishes((prev) =>
+        prev.map((w) =>
+          w.id === wishId
+            ? { ...w, title: editTitle.trim(), description: editDescription.trim() || null, url: editUrl.trim() || null }
+            : w
+        )
+      )
+      setEditingWishId(null)
+    }
+    setEditLoading(false)
+  }
+
+  async function saveEditList() {
+    if (!editListName.trim()) return
+    setEditListLoading(true)
+    const res = await fetch(`/api/lists?id=${initialList.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: editListName, theme: editListTheme }),
+    })
+    if (res.ok) {
+      setListName(editListName.trim())
+      setEditingList(false)
+    }
+    setEditListLoading(false)
+  }
+
   async function removeMember(targetUserId: number) {
     await fetch('/api/shares', {
       method: 'POST',
@@ -180,17 +237,69 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
 
         <div className={styles.listTitleRow}>
           <div>
-            <h2 className={styles.listTitle}>
-              {initialList.name}
-              {!isOwner && <span className={styles.listTitleOwner}> – {ownerName}</span>}
-            </h2>
-            {isOwner && shares.length > 0 && (
-              <div className={styles.sharedWithRow}>
-                <span className={styles.sharedWithLabel}>Delt med</span>
-                {shares.map((s) => (
-                  <span key={s.userId} className={styles.sharedWithChip}>{s.user.name}</span>
-                ))}
+            {isOwner && editingList ? (
+              <div className={styles.editWishForm}>
+                <div className={styles.listTitleEditRow}>
+                  <input
+                    className={styles.listNameInput}
+                    type="text"
+                    value={editListName}
+                    onChange={(e) => setEditListName(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                <div className={styles.themeRow}>
+                  {THEMES.map((t) => (
+                    <button
+                      key={String(t.id)}
+                      type="button"
+                      className={[styles.themeCard, editListTheme === t.id ? styles.themeCardActive : ''].join(' ')}
+                      onClick={() => setEditListTheme(t.id)}
+                      aria-pressed={editListTheme === t.id}
+                    >
+                      <span className={styles.themeEmoji}>{t.emoji}</span>
+                      <span className={styles.themeName}>{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className={styles.editWishActions}>
+                  <button className={styles.saveButton} onClick={saveEditList} disabled={editListLoading || !editListName.trim()}>
+                    {editListLoading ? 'Lagrer…' : 'Lagre'}
+                  </button>
+                  <button className={styles.cancelButton} onClick={() => { setEditingList(false); setEditListName(listName); setEditListTheme(theme) }}>
+                    Avbryt
+                  </button>
+                </div>
               </div>
+            ) : (
+              <>
+                <div className={styles.listTitleEditRow}>
+                  <h2 className={styles.listTitle}>
+                    {listName}
+                    {!isOwner && <span className={styles.listTitleOwner}> – {ownerName}</span>}
+                  </h2>
+                  {isOwner && (
+                    <button
+                      className={styles.listTitleEditButton}
+                      onClick={() => { setEditListName(listName); setEditListTheme(theme); setEditingList(true) }}
+                      aria-label="Rediger listenavn"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                {isOwner && shares.length > 0 && (
+                  <div className={styles.sharedWithRow}>
+                    <span className={styles.sharedWithLabel}>Delt med</span>
+                    {shares.map((s) => (
+                      <span key={s.userId} className={styles.sharedWithChip}>{s.user.name}</span>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
           {isOwner && (
@@ -311,77 +420,130 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
 
               return (
                 <li key={wish.id} className={styles.item}>
-                  <div className={styles.itemContent}>
-                    <span className={styles.itemTitle}>{wish.title}</span>
-                    {wish.description && (
-                      <span className={styles.itemDescription}>{wish.description}</span>
-                    )}
-                    {wish.url && (
-                      <a
-                        className={styles.itemUrl}
-                        href={wish.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Se produkt →
-                      </a>
-                    )}
+                  {isOwner && editingWishId === wish.id ? (
+                    <div className={styles.editWishForm}>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Hva ønsker du deg? *"
+                        autoFocus
+                      />
+                      <input
+                        className={styles.input}
+                        type="text"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Beskrivelse (valgfritt)"
+                      />
+                      <input
+                        className={styles.input}
+                        type="url"
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                        placeholder="Lenke (valgfritt)"
+                      />
+                      <div className={styles.editWishActions}>
+                        <button
+                          className={styles.saveButton}
+                          onClick={() => saveEditWish(wish.id)}
+                          disabled={editLoading || !editTitle.trim()}
+                        >
+                          {editLoading ? 'Lagrer…' : 'Lagre'}
+                        </button>
+                        <button className={styles.cancelButton} onClick={() => setEditingWishId(null)}>
+                          Avbryt
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className={styles.itemContent}>
+                        <span className={styles.itemTitle}>{wish.title}</span>
+                        {wish.description && (
+                          <span className={styles.itemDescription}>{wish.description}</span>
+                        )}
+                        {wish.url && (
+                          <a
+                            className={styles.itemUrl}
+                            href={wish.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Se produkt →
+                          </a>
+                        )}
 
-                    {/* Reservation controls — viewer only */}
-                    {!isOwner && (
-                      <div className={styles.reservationRow}>
-                        {myReservation ? (
-                          <>
-                            <span className={[styles.reservedBadge, res.status === 'kjopt' ? styles.reservedBadgeBought : ''].filter(Boolean).join(' ')}>
-                              {res.status === 'kjopt' ? '🛍 Du har kjøpt dette' : '✓ Du har reservert dette'}
-                            </span>
-                            <button
-                              className={styles.undoButton}
-                              onClick={() => undoReservation(wish.id)}
-                            >
-                              Angre
-                            </button>
-                          </>
-                        ) : someoneElse ? (
-                          <span className={[styles.reservedBadge, styles.reservedBadgeOther].join(' ')}>
-                            {res.status === 'kjopt'
-                              ? `🛍 Kjøpt av ${res.user.name}`
-                              : `✓ Reservert av ${res.user.name}`}
-                          </span>
-                        ) : (
-                          <>
-                            <button
-                              className={styles.reserveButton}
-                              onClick={() => setReservation(wish.id, 'reservert')}
-                            >
-                              Reserver
-                            </button>
-                            <button
-                              className={styles.buyButton}
-                              onClick={() => setReservation(wish.id, 'kjopt')}
-                            >
-                              Kjøpt
-                            </button>
-                          </>
+                        {/* Reservation controls — viewer only */}
+                        {!isOwner && (
+                          <div className={styles.reservationRow}>
+                            {myReservation ? (
+                              <>
+                                <span className={[styles.reservedBadge, res.status === 'kjopt' ? styles.reservedBadgeBought : ''].filter(Boolean).join(' ')}>
+                                  {res.status === 'kjopt' ? '🛍 Du har kjøpt dette' : '✓ Du har reservert dette'}
+                                </span>
+                                <button
+                                  className={styles.undoButton}
+                                  onClick={() => undoReservation(wish.id)}
+                                >
+                                  Angre
+                                </button>
+                              </>
+                            ) : someoneElse ? (
+                              <span className={[styles.reservedBadge, styles.reservedBadgeOther].join(' ')}>
+                                {res.status === 'kjopt'
+                                  ? `🛍 Kjøpt av ${res.user.name}`
+                                  : `✓ Reservert av ${res.user.name}`}
+                              </span>
+                            ) : (
+                              <>
+                                <button
+                                  className={styles.reserveButton}
+                                  onClick={() => setReservation(wish.id, 'reservert')}
+                                >
+                                  Reserver
+                                </button>
+                                <button
+                                  className={styles.buyButton}
+                                  onClick={() => setReservation(wish.id, 'kjopt')}
+                                >
+                                  Kjøpt
+                                </button>
+                              </>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Delete button — owner only */}
-                  {isOwner && (
-                    <button
-                      className={styles.deleteButton}
-                      onClick={() => deleteWish(wish.id)}
-                      aria-label={`Slett ${wish.title}`}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                        <path d="M10 11v6M14 11v6" />
-                        <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                      </svg>
-                    </button>
+                      {/* Edit + Delete buttons — owner only */}
+                      {isOwner && (
+                        <>
+                          <button
+                            className={styles.editButton}
+                            onClick={() => startEditWish(wish)}
+                            aria-label={`Rediger ${wish.title}`}
+                          >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                          </button>
+                          <button
+                            className={styles.deleteButton}
+                            onClick={() => deleteWish(wish.id)}
+                            aria-label={`Slett ${wish.title}`}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                              <path d="M10 11v6M14 11v6" />
+                              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </>
                   )}
                 </li>
               )

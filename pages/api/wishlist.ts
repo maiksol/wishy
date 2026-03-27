@@ -86,6 +86,25 @@ export default async function handler(
     return res.status(201).json(wish)
   }
 
+  if (req.method === 'PATCH') {
+    const wishId = Number(req.query.id)
+    const wish = await prisma.wish.findUnique({ where: { id: wishId }, include: { list: true } })
+    if (!wish) return res.status(404).json({ error: 'Ønske ikke funnet' })
+    if (wish.list.ownerId !== userId) return res.status(403).json({ error: 'Kun eieren kan redigere ønsker' })
+    const { title, description, url } = req.body as { title?: string; description?: string; url?: string }
+    if (title !== undefined && !title.trim()) return res.status(400).json({ error: 'Tittel kan ikke være tom' })
+    const updated = await prisma.wish.update({
+      where: { id: wishId },
+      data: {
+        ...(title !== undefined && { title: title.trim() }),
+        ...(description !== undefined && { description: description.trim() || null }),
+        ...(url !== undefined && { url: url.trim() || null }),
+      },
+      include: { reservation: { include: { user: { select: { id: true, name: true } } } } },
+    })
+    return res.status(200).json(updated)
+  }
+
   if (req.method === 'DELETE') {
     const wishId = Number(req.query.id)
     const wish = await prisma.wish.findUnique({ where: { id: wishId }, include: { list: true } })
@@ -95,6 +114,6 @@ export default async function handler(
     return res.status(204).end()
   }
 
-  res.setHeader('Allow', ['GET', 'POST', 'DELETE'])
+  res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE'])
   res.status(405).end()
 }
