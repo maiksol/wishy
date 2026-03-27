@@ -548,6 +548,32 @@
   border-color: var(--primary);
 }
 
+/* ─── Shared with row (owner view) ─── */
+.sharedWithRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.sharedWithLabel {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.sharedWithChip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border-radius: 99px;
+  padding: 0.15rem 0.6rem;
+}
+
 /* ─── List title row (with share button) ─── */
 .listTitleRow {
   display: flex;

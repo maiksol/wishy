@@ -192,7 +192,17 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
         </header>
 
         <div className={styles.listTitleRow}>
-          <h2 className={styles.listTitle}>{initialList.name}</h2>
+          <div>
+            <h2 className={styles.listTitle}>{initialList.name}</h2>
+            {isOwner && shares.length > 0 && (
+              <div className={styles.sharedWithRow}>
+                <span className={styles.sharedWithLabel}>Delt med</span>
+                {shares.map((s) => (
+                  <span key={s.userId} className={styles.sharedWithChip}>{s.user.name}</span>
+                ))}
+              </div>
+            )}
+          </div>
           {isOwner && (
             <button
               className={styles.shareToggleButton}
