@@ -944,21 +944,30 @@
 }
 
 /* ─── Edit wish ─── */
+.itemActions {
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
 .editButton {
+  flex-shrink: 0;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  transition: color 0.15s;
-  flex-shrink: 0;
+  justify-content: center;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
 }
 
 .editButton:hover {
   color: var(--primary);
+  background: var(--primary-subtle);
 }
 
 .editWishForm {
