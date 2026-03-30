@@ -163,7 +163,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'revoke-token', listId: initialList.id }),
     })
-    if (res.ok) setShareToken(null)
+    if (res.ok) { setShareToken(null); setShowSharePanel(false) }
     setTokenLoading(false)
   }
 
@@ -171,7 +171,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
     if (!shareToken) return
     const url = `${window.location.origin}/invite?token=${shareToken}`
     if (navigator.share) {
-      await navigator.share({ url, title: `${initialList.name} – Wishy` }).catch(() => null)
+      await navigator.share({ url, title: `${initialList.name} – Wishy` }).then(() => setShowSharePanel(false)).catch(() => null)
     } else {
       await navigator.clipboard.writeText(url)
       setCopied(true)
@@ -338,7 +338,7 @@ export default function ListPage({ list: initialList, wishes: initialWishes, isO
                     {copied ? '✓ Kopiert' : (typeof navigator !== 'undefined' && 'share' in navigator ? 'Del' : 'Kopier')}
                   </button>
                   <button className={styles.revokeButton} onClick={revokeToken} disabled={tokenLoading}>
-                    Trekk tilbake
+                    Avbryt
                   </button>
                 </div>
               ) : null}
